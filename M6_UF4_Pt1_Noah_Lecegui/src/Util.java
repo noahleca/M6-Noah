@@ -6,7 +6,7 @@ public class Util {
         boolean valido = false;
 
         while (!valido) {
-            System.out.println("Introduce un numero del 1 al 6: ");
+            System.out.print("Introduce un numero del 1 al 6 >> ");
             try {
                 opcion = Integer.parseInt(scanner.nextLine());
                 if (opcion >= 1 && opcion <= 6) {
@@ -18,7 +18,24 @@ public class Util {
                 System.out.println("Error: El valor introducido no es un número.");
             }
         }
+        System.out.println();
         return opcion;
+    }
+
+    public static int obtenerCodigo() {
+        return -1;
+    }
+
+    public static String obtenerNombre() {
+        return "";
+    }
+
+    public static int obtenerEdad() {
+        return -1;
+    }
+
+    public static double obtenerNotaMedi() {
+        return -1;
     }
 
 

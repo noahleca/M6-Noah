@@ -47,4 +47,14 @@ public class Alumno implements Serializable {
     public void setMediaNotas(double mediaNotas) {
         this.mediaNotas = mediaNotas;
     }
+
+    @Override
+    public String toString() {
+        return "Alumno{" +
+                "codigo=" + codigo +
+                ", nombre='" + nombre + '\'' +
+                ", edad=" + edad +
+                ", mediaNotas=" + mediaNotas +
+                '}';
+    }
 }
