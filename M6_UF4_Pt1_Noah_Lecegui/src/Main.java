@@ -1,11 +1,15 @@
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class Main {
     public static Scanner scanner = new Scanner(System.in);
-    public final static int MAXLEN = 30;
+    public static final int SIZE_OF_STRING = 50;
+    public static final int SIZE_OF_INT = Integer.BYTES;
+    public static final int SIZE_OF_DOUBLE = Double.BYTES;
+    public static final int SIZE_OF_RECORD = SIZE_OF_INT + SIZE_OF_STRING + SIZE_OF_INT + SIZE_OF_DOUBLE;
 
     public static void main(String[] args) throws IOException {
         verificarArchivo();
@@ -15,10 +19,10 @@ public class Main {
             int opcion;
             do {
                 generateMenu();
-                opcion = Util.obtenerOpcion(scanner);
+                opcion = obtenerOpcion(scanner);
                 switch (opcion) {
                     case 1:
-                        leerAlumnos("alumnes.bin");
+                        leerAlumnos(raf);
                         System.out.println();
                         break;
                     case 2:
@@ -57,49 +61,96 @@ public class Main {
         System.out.println("6. Sortir");
     }
 
-    public static void leerAlumnos(String nombreArchivo) {
+    public static int obtenerOpcion(Scanner scanner) {
+        while (!scanner.hasNextInt()) {
+            System.out.println("Por favor, introduce un número válido.");
+            scanner.next();
+        }
+        return scanner.nextInt();
+    }
 
+    public static void leerAlumnos(RandomAccessFile raf) {
+        try {
+            long numRegistros = raf.length() / SIZE_OF_RECORD;
+            for (int i = 0; i < numRegistros; i++) {
+                raf.seek((long) i * SIZE_OF_RECORD);
+                Alumno alumno = leerRegistro(raf);
+                if (alumno != null) {
+                    System.out.println(alumno);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    public static Alumno leerRegistro(RandomAccessFile raf) {
+        try {
+            int codigo = raf.readInt();
+            String nombre = readFixedLengthString(raf, SIZE_OF_STRING);
+            int edad = raf.readInt();
+            double mediaNotas = raf.readDouble();
+            return new Alumno(codigo, nombre, edad, mediaNotas);
+        } catch (IOException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public static String readFixedLengthString(RandomAccessFile raf, int length) throws IOException {
+        byte[] bytes = new byte[length];
+        raf.readFully(bytes);
+        return new String(bytes, StandardCharsets.UTF_8).trim();
     }
 
     public static void escribirAlumnos(RandomAccessFile raf) {
-        List<Alumno> listaAlumnos = new ArrayList<>();
-
-        while (true) {
-            System.out.println("Codigo del alumno >> ");
-            int codigo = scanner.nextInt();
-            scanner.nextLine();
-            if (codigo == -1) {
-                break;
-            }
-
-            System.out.println("Nombre del alumno >> ");
-            String nombre = scanner.nextLine();
-
-            System.out.println("Edad del alumno >> ");
-            int edad = scanner.nextInt();
-
-            System.out.println("Nota media del alumno >> ");
-            double notaMedia = scanner.nextDouble();
-
-            listaAlumnos.add(new Alumno(codigo, nombre, edad, notaMedia));
-        }
-
         try {
-            for (Alumno alumno : listaAlumnos) {
-                escribirRegistro(raf, alumno);
+            raf.seek(raf.length()); // Posiciona el puntero al final del archivo
+            List<Alumno> alumnos = new ArrayList<>();
+            while (true) {
+                System.out.println("Codigo del alumno >> ");
+                int codigo = scanner.nextInt();
+                scanner.nextLine();
+                if (codigo == -1) {
+                    break;
+                }
+
+                System.out.println("Nombre del alumno >> ");
+                String nombre = scanner.nextLine();
+
+                System.out.println("Edad del alumno >> ");
+                int edad = scanner.nextInt();
+
+                System.out.println("Nota media del alumno >> ");
+                double notaMedia = scanner.nextDouble();
+
+                Alumno alumno = new Alumno(codigo, nombre, edad, notaMedia);
+                alumnos.add(alumno);
             }
-        } catch (Exception e) {
+            for (Alumno a : alumnos) {
+                escribirRegistro(raf, a);
+            }
+        } catch (IOException e) {
             System.out.println("Error: " + e.getMessage());
         }
     }
 
     public static void escribirRegistro(RandomAccessFile raf, Alumno alumno) {
         try {
-            raf.write(alumno.getCodigo());
-
-        } catch (Exception e) {
+            raf.writeInt(alumno.getCodigo());
+            writeFixedLengthString(raf, alumno.getNombre(), SIZE_OF_STRING);
+            raf.writeInt(alumno.getEdad());
+            raf.writeDouble(alumno.getMediaNotas());
+        } catch (IOException e) {
             System.out.println("Error: " + e.getMessage());
         }
+    }
+
+    public static void writeFixedLengthString(RandomAccessFile raf, String string, int length) throws IOException {
+        byte[] bytes = new byte[length];
+        byte[] stringBytes = string.getBytes(StandardCharsets.UTF_8);
+        System.arraycopy(stringBytes, 0, bytes, 0, Math.min(stringBytes.length, length));
+        raf.write(bytes);
     }
 
     public static void verificarArchivo() {
