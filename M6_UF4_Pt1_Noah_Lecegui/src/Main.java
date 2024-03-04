@@ -30,7 +30,8 @@ public class Main {
                         System.out.println();
                         break;
                     case 3:
-                        System.out.println("Has triat l'opció 3");
+                        eliminarAlumno2(raf);
+                        System.out.println();
                         break;
                     case 4:
                         leerAlumnoEspecifico(raf);
@@ -116,38 +117,26 @@ public class Main {
         scanner.nextLine();
     }
 
-    public void eliminarAlumno(RandomAccessFile raf) {
-        System.out.print("Introduce el codigo del alumno que deseas eliminar: ");
+    public static void eliminarAlumno2(RandomAccessFile raf) {
+        System.out.println("Codigo del alumno a eliminar >> ");
         int codigo = scanner.nextInt();
-        boolean encontrado = false;
 
         try {
-            File tempFile = new File("alumnes.bin");
-            RandomAccessFile tempRaf = new RandomAccessFile(tempFile, "rw");
             raf.seek(0);
             while (raf.getFilePointer() < raf.length()) {
-                long posInicio = raf.getFilePointer();
+                long posInicial = raf.getFilePointer();
                 Alumno alumno = leerRegistro(raf);
                 if (alumno.getCodigo() == codigo) {
-                    encontrado = true;
-                    System.out.println("Información del alumno encontrado:");
-                    System.out.println("Código: " + alumno.getCodigo());
-                    System.out.println("Nombre: " + alumno.getNombre());
-                    System.out.println("Edad: " + alumno.getEdad());
-                    System.out.println("Nota Media: " + alumno.getMediaNotas());
-
-                    System.out.print("¿Estás seguro de eliminar este alumno? (Introduce -1 para confirmar): ");
-                    int confirmacion = scanner.nextInt();
-                    if (confirmacion == -1) {
-
-                    } else {
-                        tempRaf.seek();
-                    }
+                    raf.seek(posInicial);
+                    alumno.setCodigo(-1);
+                    escribirRegistro(raf, alumno);
+                    System.out.println("Alumno modificado adecuadamente.");
+                    return;
                 }
             }
-
-        } catch (Exception ex) {
-            System.out.println("Error: " + ex.getMessage());
+            System.out.println("No se encontró un alumno con el código proporcionado.");
+        } catch (IOException e) {
+            System.out.println("Error al modificar el código del alumno: " + e.getMessage());
         }
     }
 
@@ -163,8 +152,10 @@ public class Main {
                 System.out.println("Codigo     Nombre                 Edad     Nota media");
                 while (raf.getFilePointer() < raf.length()) {
                     alumno = leerRegistro(raf);
-                    System.out.printf("%-10d %-22s %-8d %.2f", alumno.getCodigo(), alumno.getNombre(), alumno.getEdad(), alumno.getMediaNotas());
-                    System.out.println();
+                    if (alumno.getCodigo() != -1) {
+                        System.out.printf("%-10d %-22s %-8d %.2f", alumno.getCodigo(), alumno.getNombre(), alumno.getEdad(), alumno.getMediaNotas());
+                        System.out.println();
+                    }
                 }
             }
         } catch (Exception e) {
