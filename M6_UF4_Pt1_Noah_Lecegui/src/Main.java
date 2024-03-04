@@ -33,7 +33,8 @@ public class Main {
                         System.out.println("Has triat l'opció 3");
                         break;
                     case 4:
-                        System.out.println("Has triat l'opció 4");
+                        leerAlumnoEspecifico(raf);
+                        System.out.println();
                         break;
                     case 5:
                         System.out.println("Has triat l'opció 5");
@@ -60,22 +61,56 @@ public class Main {
         System.out.println("5. Calcular mitjana d'edat dels alumnes del fitxer alumnes.bin");
         System.out.println("6. Sortir");
     }
+    public static void calcularEdadMediana() {
+
+    }
+    public static void leerAlumnoEspecifico(RandomAccessFile raf) {
+        Alumno alumno;
+        boolean existe = false;
+
+        System.out.print("Codigo del alumno >> ");
+        int codigo = scanner.nextInt();
+        System.out.println();
+        try {
+            raf.seek(0);
+            if (raf.length() == 0) {
+                System.out.println("Aún no hay registros de alumnos.");
+            } else {
+                while (raf.getFilePointer() < raf.length()) {
+                    alumno = leerRegistro(raf);
+                    if (alumno.getCodigo() == codigo) {
+                        System.out.println("Codigo     Nombre                 Edad     Nota media");
+                        System.out.printf("%-10d %-22s %-8d %.2f", alumno.getCodigo(), alumno.getNombre(), alumno.getEdad(), alumno.getMediaNotas());
+                        System.out.println();
+                        existe = true;
+                    }
+                }
+                if (!existe) {
+                    System.out.println("No existe un registro con este codigo.");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+
+        }
+        scanner.nextLine();
+    }
 
     public static void leerAlumnos(RandomAccessFile raf) {
         Alumno alumno;
         try {
             raf.seek(0);
-            System.out.println("Contenido del archivo: ");
-            System.out.println("Medida del archivo: " + raf.length());
-            System.out.println("Total de registros: " + raf.length() / SIZE_OF_RECORD);
-            System.out.println();
-            int cont = 0;
-            while (raf.getFilePointer() < raf.length()) {
-                System.out.printf("Registre: %d Posició: %d\n", cont, raf.getFilePointer());
-                alumno = leerRegistro(raf);
-                System.out.println(alumno.toString());
+            if (raf.length() == 0) {
+                System.out.println("Aún no hay registros de alumnos.");
+            } else {
+                System.out.println("Contenido del archivo: ");
                 System.out.println();
-                cont++;
+                System.out.println("Codigo     Nombre                 Edad     Nota media");
+                while (raf.getFilePointer() < raf.length()) {
+                    alumno = leerRegistro(raf);
+                    System.out.printf("%-10d %-22s %-8d %.2f", alumno.getCodigo(), alumno.getNombre(), alumno.getEdad(), alumno.getMediaNotas());
+                    System.out.println();
+                }
             }
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
@@ -114,11 +149,14 @@ public class Main {
 
     public static void escribirAlumnos(RandomAccessFile raf) {
         List<Alumno> alumnos = new ArrayList<>();
+        List<Integer> codigosCola = new ArrayList<>();
+
         try {
             RandomAccessFile rafLeer = new RandomAccessFile("alumnes.bin", "r");
 
             while (true) {
-                int codigo = Util.obtenerCodigo(scanner, ObtenerAlumnos(rafLeer));
+                int codigo = Util.obtenerCodigo(scanner, ObtenerAlumnos(rafLeer), codigosCola);
+                codigosCola.add(codigo);
                 if (codigo == -1) {
                     break;
                 }
@@ -135,7 +173,7 @@ public class Main {
             for (Alumno alumno : alumnos) {
                 escribirRegistro(raf, alumno);
             }
-            System.out.println("\nSe han añadido " + alumnos.size() + " alumnos al archivo " + f.getPath());
+            System.out.println("\nSe han añadido " + alumnos.size() + " alumno/s al archivo " + f.getPath());
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }

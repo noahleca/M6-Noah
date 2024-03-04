@@ -23,7 +23,7 @@ public class Util {
         return opcion;
     }
 
-    public static int obtenerCodigo(Scanner scanner, List<Alumno> alumnos) {
+    public static int obtenerCodigo(Scanner scanner, List<Alumno> alumnos, List<Integer> codigosCola) {
         int codigo = 0;
         boolean valido = false;
 
@@ -31,7 +31,7 @@ public class Util {
             System.out.print("Codigo del alumno >> ");
             try {
                 codigo = Integer.parseInt(scanner.nextLine());
-                if (codigo >= -1 && !existeCodigo(alumnos, codigo)) {
+                if (codigo >= -1 && !existeCodigo(alumnos, codigo) && !existeCodigoCola(codigosCola, codigo)) {
                     valido = true;
                 } else {
                     if (codigo < -1) {
@@ -47,6 +47,15 @@ public class Util {
         return codigo;
     }
 
+    public static boolean existeCodigoCola(List<Integer> codigosCola, int nuevoCodigo) {
+        for (int codigo : codigosCola) {
+            if (codigo == nuevoCodigo) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static boolean existeCodigo(List<Alumno> alumnos, int nuevoCodigo) {
         for (Alumno alumno : alumnos) {
             if (alumno.getCodigo() == nuevoCodigo) {
@@ -60,8 +69,21 @@ public class Util {
         if (nombre == null || nombre.isEmpty()) {
             return nombre;
         }
-        return nombre.substring(0, 1).toUpperCase() + nombre.substring(1).toLowerCase();
+
+        StringBuilder resultado = new StringBuilder();
+        String[] palabras = nombre.split("\\s+");
+
+        for (String palabra : palabras) {
+            if (!palabra.isEmpty()) {
+                resultado.append(palabra.substring(0, 1).toUpperCase());
+                resultado.append(palabra.substring(1).toLowerCase());
+                resultado.append(" ");
+            }
+        }
+
+        return resultado.toString().trim();
     }
+
 
     public static int obtenerEdad(Scanner scanner) {
         int edad = 0;
