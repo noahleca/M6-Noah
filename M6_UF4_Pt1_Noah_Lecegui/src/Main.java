@@ -37,7 +37,8 @@ public class Main {
                         System.out.println();
                         break;
                     case 5:
-                        System.out.println("Has triat l'opció 5");
+                        calcularEdadMediana(raf);
+                        System.out.println();
                         break;
                     case 6:
                         System.out.println("Gracias por utilizar el programa. Hasta pronto!");
@@ -61,9 +62,28 @@ public class Main {
         System.out.println("5. Calcular mitjana d'edat dels alumnes del fitxer alumnes.bin");
         System.out.println("6. Sortir");
     }
-    public static void calcularEdadMediana() {
 
+    public static void calcularEdadMediana(RandomAccessFile raf) {
+        double edadTotal = 0;
+        int nAlumnos = 0;
+        Alumno alumno;
+        try {
+            raf.seek(0);
+            if (raf.length() == 0) {
+                System.out.println("Aún no hay registros de alumnos.");
+            } else {
+                while (raf.getFilePointer() < raf.length()) {
+                    alumno = leerRegistro(raf);
+                    edadTotal += alumno.getEdad();
+                    nAlumnos++;
+                }
+                System.out.println("La media de edad de los alumnos es de: " + (edadTotal / nAlumnos));
+            }
+        } catch (Exception ex) {
+            System.out.println("Error: " + ex.getMessage());
+        }
     }
+
     public static void leerAlumnoEspecifico(RandomAccessFile raf) {
         Alumno alumno;
         boolean existe = false;
@@ -94,6 +114,41 @@ public class Main {
 
         }
         scanner.nextLine();
+    }
+
+    public void eliminarAlumno(RandomAccessFile raf) {
+        System.out.print("Introduce el codigo del alumno que deseas eliminar: ");
+        int codigo = scanner.nextInt();
+        boolean encontrado = false;
+
+        try {
+            File tempFile = new File("alumnes.bin");
+            RandomAccessFile tempRaf = new RandomAccessFile(tempFile, "rw");
+            raf.seek(0);
+            while (raf.getFilePointer() < raf.length()) {
+                long posInicio = raf.getFilePointer();
+                Alumno alumno = leerRegistro(raf);
+                if (alumno.getCodigo() == codigo) {
+                    encontrado = true;
+                    System.out.println("Información del alumno encontrado:");
+                    System.out.println("Código: " + alumno.getCodigo());
+                    System.out.println("Nombre: " + alumno.getNombre());
+                    System.out.println("Edad: " + alumno.getEdad());
+                    System.out.println("Nota Media: " + alumno.getMediaNotas());
+
+                    System.out.print("¿Estás seguro de eliminar este alumno? (Introduce -1 para confirmar): ");
+                    int confirmacion = scanner.nextInt();
+                    if (confirmacion == -1) {
+
+                    } else {
+                        tempRaf.seek();
+                    }
+                }
+            }
+
+        } catch (Exception ex) {
+            System.out.println("Error: " + ex.getMessage());
+        }
     }
 
     public static void leerAlumnos(RandomAccessFile raf) {

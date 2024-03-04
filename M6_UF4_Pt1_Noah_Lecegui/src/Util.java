@@ -2,6 +2,27 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Util {
+
+    public static int obtenerNumero(Scanner scanner) {
+        int numero = 0;
+        boolean valido = false;
+
+        while (!valido) {
+            System.out.print("Introduce un numero >> ");
+            try {
+                numero = Integer.parseInt(scanner.nextLine());
+                if (numero >= 0) {
+                    valido = true;
+                } else {
+                    System.out.println("Error: El numero introducido no puede ser negativo.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Error: El valor introducido no es un número.");
+            }
+        }
+        System.out.println();
+        return numero;
+    }
     public static int obtenerOpcion(Scanner scanner) {
         int opcion = 0;
         boolean valido = false;
